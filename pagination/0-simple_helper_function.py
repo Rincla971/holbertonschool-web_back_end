@@ -1,40 +1,22 @@
 #!/usr/bin/env python3
-""" log stats """
-import pymongo
+"""
+This module provides a helper function for pagination.
+"""
 
+from typing import Tuple
 
-def main():
-    """ main """
-    client = pymongo.MongoClient("mongodb://localhost:27017")
-    collection = client.logs.nginx
-    print('%s logs' % (collection.count_documents({})))
-    print('Methods:')
-    methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
-    for method in methods:
-        find_len_display(collection, method)
-    status = [
-        v
-        for v
-        in collection.find({'method': 'GET', 'path': '/status'})
-    ]
-    print('%s status check' % (len(status)))
+def index_range(page: int, page_size: int) -> Tuple[int, int]:
+    """
+    Returns a tuple containing the start and end index for a given
+    page number and page size.
 
+    Args:
+        page (int): The page number (1-indexed).
+        page_size (int): The number of items per page.
 
-def find(collection, method):
-    """ find """
-    regex = method
-    return collection.find({'method': {'$regex': regex}})
-
-
-def find_len(collection, method):
-    """ find len """
-    return len([v for v in find(collection, method)])
-
-
-def find_len_display(collection, method):
-    """ find len display """
-    print('\tmethod %s: %s' % (method, find_len(collection, method)))
-
-
-if __name__ == '__main__':
-    main()
+    Returns:
+        Tuple[int, int]: A tuple containing the start index and end index.
+    """
+    start_index = (page - 1) * page_size
+    end_index = start_index + page_size
+    return (start_index, end_index)
